@@ -1,0 +1,232 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<views:BasePage
+    x:Class="MyNotes.Views.SheetListPage"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:MyNotes.Converters"
+    xmlns:dxcv="http://schemas.devexpress.com/xamarin/2014/forms/collectionview"
+    xmlns:local="clr-namespace:MyNotes"
+    xmlns:models="clr-namespace:MyNotes.Models"
+    xmlns:viewmodels="clr-namespace:MyNotes.ViewModels"
+    xmlns:views="clr-namespace:MyNotes.Views"
+    xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
+    x:DataType="viewmodels:SheetListViewModel"
+    BackgroundColor="{AppThemeBinding Dark={StaticResource WindowBackgroundColorDark},
+                                      Light={StaticResource WindowBackgroundColor}}">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <xct:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <converters:DateTimeOffsetConverter x:Key="DateTimeOffsetConverter" />
+            <converters:SheetCompletedItemTextConverter x:Key="SheetCompletedItemTextConverter" />
+
+            <Style x:Key="CardFrame" TargetType="Frame">
+                <Setter Property="Padding" Value="10" />
+
+                <Setter Property="VisualStateManager.VisualStateGroups">
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Dark={StaticResource CardBackgroundColorDark}, Light={StaticResource CardBackgroundColor}}" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Selected">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Dark={StaticResource CardSelectedBackgroundColorDark}, Light={StaticResource CardSelectedBackgroundColor}}" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </Setter>
+            </Style>
+
+            <Style
+                x:Key="CardPinnedFrame"
+                BasedOn="{StaticResource CardFrame}"
+                TargetType="Frame">
+
+                <Setter Property="VisualStateManager.VisualStateGroups">
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Dark={StaticResource CardPinnedBackgroundColorDark}, Light={StaticResource CardPinnedBackgroundColor}}" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Selected">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Dark={StaticResource CardSelectedBackgroundColorDark}, Light={StaticResource CardSelectedBackgroundColor}}" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </Setter>
+
+            </Style>
+
+            <Style
+                x:Key="CardTitle"
+                BasedOn="{StaticResource PrimaryLabel}"
+                TargetType="Label">
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="FontSize" Value="Large" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+
+            <Style
+                x:Key="CardContent"
+                BasedOn="{StaticResource PrimaryLabel}"
+                TargetType="Label">
+                <Setter Property="FontSize" Value="Small" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+
+            <Style
+                x:Key="CardHint"
+                BasedOn="{StaticResource SecondaryLabel}"
+                TargetType="Label">
+                <Setter Property="FontSize" Value="Micro" />
+                <Setter Property="VerticalOptions" Value="Center" />
+            </Style>
+
+            <DataTemplate x:Key="DefaultItemTemplate" x:DataType="models:Sheet">
+                <dxcv:SwipeContainer>
+                    <dxcv:SwipeContainer.ItemView>
+
+                        <Frame Style="{StaticResource CardFrame}">
+                            <StackLayout>
+                                <Grid ColumnDefinitions="*, Auto">
+                                    <Label
+                                        Grid.Column="0"
+                                        Style="{StaticResource CardTitle}"
+                                        Text="{Binding Name}" />
+                                    <Label
+                                        Grid.Column="1"
+                                        Style="{StaticResource CardHint}"
+                                        Text="{Binding LastUpdated, Converter={StaticResource DateTimeOffsetConverter}}" />
+                                </Grid>
+                                <Label Style="{StaticResource CardContent}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Completed: " />
+                                            <Span Text="{Binding ., Converter={StaticResource SheetCompletedItemTextConverter}}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </StackLayout>
+                        </Frame>
+                    </dxcv:SwipeContainer.ItemView>
+
+                    <dxcv:SwipeContainer.StartSwipeItems>
+                        <dxcv:SwipeItem
+                            BackgroundColor="#fda601"
+                            Caption="Pin"
+                            Command="{Binding Path=BindingContext.PinSheetCommand, Source={x:Reference Name=sheetCollectionView}}"
+                            CommandParameter="{Binding .}"
+                            Image="collectionview_pintotop" />
+                    </dxcv:SwipeContainer.StartSwipeItems>
+
+                    <dxcv:SwipeContainer.EndSwipeItems>
+                        <dxcv:SwipeItem
+                            BackgroundColor="#ff3b30"
+                            Caption="Delete"
+                            Command="{Binding Path=BindingContext.DeleteSheetCommand, Source={x:Reference Name=sheetCollectionView}}"
+                            CommandParameter="{Binding .}"
+                            Image="collectionview_deletetask" />
+                    </dxcv:SwipeContainer.EndSwipeItems>
+
+                </dxcv:SwipeContainer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="PinnedItemTemplate" x:DataType="models:Sheet">
+                <dxcv:SwipeContainer>
+
+                    <dxcv:SwipeContainer.ItemView>
+                        <Frame Style="{StaticResource CardPinnedFrame}">
+                            <StackLayout>
+                                <Grid ColumnDefinitions="*, Auto">
+                                    <Label
+                                        Grid.Column="0"
+                                        Style="{StaticResource CardTitle}"
+                                        Text="{Binding Name}"
+                                        TextColor="#e59601" />
+                                    <Label
+                                        Grid.Column="1"
+                                        Style="{StaticResource CardHint}"
+                                        Text="{Binding LastUpdated, Converter={StaticResource DateTimeOffsetConverter}}" />
+                                </Grid>
+                                <Label Style="{StaticResource CardContent}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Completed: " />
+                                            <Span Text="{Binding ., Converter={StaticResource SheetCompletedItemTextConverter}}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </StackLayout>
+                        </Frame>
+                    </dxcv:SwipeContainer.ItemView>
+
+                    <dxcv:SwipeContainer.StartSwipeItems>
+                        <dxcv:SwipeItem
+                            BackgroundColor="#007df6"
+                            Caption="Unpin"
+                            Command="{Binding Path=BindingContext.UnpinSheetCommand, Source={x:Reference Name=sheetCollectionView}}"
+                            CommandParameter="{Binding .}"
+                            Image="collectionview_uncompletetask" />
+                    </dxcv:SwipeContainer.StartSwipeItems>
+
+                    <dxcv:SwipeContainer.EndSwipeItems>
+                        <dxcv:SwipeItem
+                            BackgroundColor="#ff3b30"
+                            Caption="Delete"
+                            Command="{Binding Path=BindingContext.DeleteSheetCommand, Source={x:Reference Name=sheetCollectionView}}"
+                            CommandParameter="{Binding .}"
+                            Image="collectionview_deletetask" />
+                    </dxcv:SwipeContainer.EndSwipeItems>
+
+                </dxcv:SwipeContainer>
+            </DataTemplate>
+
+            <local:SheetDataTemplateSelector
+                x:Key="sheetDataTemplateSelector"
+                DefaultDataTemplate="{StaticResource DefaultItemTemplate}"
+                PinnedDataTemplate="{StaticResource PinnedItemTemplate}" />
+
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ContentPage.BindingContext>
+        <viewmodels:SheetListViewModel />
+    </ContentPage.BindingContext>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Command="{Binding SwitchThemeCommand}" IconImageSource="ic_theme_light" />
+    </ContentPage.ToolbarItems>
+
+    <ContentPage.Content>
+        <Grid>
+
+            <dxcv:DXCollectionView
+                x:Name="sheetCollectionView"
+                IsPullToRefreshEnabled="True"
+                IsRefreshing="{Binding IsRefreshing, Mode=TwoWay}"
+                ItemSpacing="4"
+                ItemTemplate="{StaticResource sheetDataTemplateSelector}"
+                ItemsSource="{Binding Sheets}"
+                PullToRefreshCommand="{Binding RefreshCommand}"
+                SelectedItem="{Binding SelectedSheet, Mode=TwoWay}"
+                SelectionMode="Single" />
+
+            <ImageButton
+                Margin="30"
+                Command="{Binding AddCommand}"
+                HorizontalOptions="End"
+                IsEnabled="{Binding IsBusy, Mode=OneWay, Converter={StaticResource InvertedBoolConverter}}"
+                Style="{StaticResource AddFab}"
+                VerticalOptions="End" />
+
+        </Grid>
+    </ContentPage.Content>
+</views:BasePage>

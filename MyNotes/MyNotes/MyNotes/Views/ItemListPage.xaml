@@ -1,0 +1,257 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<views:BasePage
+    x:Class="MyNotes.Views.ItemListPage"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:MyNotes.Converters"
+    xmlns:dxcv="http://schemas.devexpress.com/xamarin/2014/forms/collectionview"
+    xmlns:local="clr-namespace:MyNotes"
+    xmlns:models="clr-namespace:MyNotes.Models"
+    xmlns:viewmodels="clr-namespace:MyNotes.ViewModels"
+    xmlns:views="clr-namespace:MyNotes.Views"
+    xmlns:xct="http://xamarin.com/schemas/2020/toolkit"
+    Title="{Binding Title}"
+    x:DataType="viewmodels:ItemListViewModel"
+    BackgroundColor="{AppThemeBinding Dark={StaticResource WindowBackgroundColorDark},
+                                      Light={StaticResource WindowBackgroundColor}}">
+
+    <ContentPage.BindingContext>
+        <viewmodels:ItemListViewModel />
+    </ContentPage.BindingContext>
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <xct:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <xct:ItemSelectedEventArgsConverter x:Key="ItemSelectedEventArgsConverter" />
+            <converters:ItemStatusToTextDecorationConverter x:Key="ItemStatusToTextDecorationConverter" />
+
+
+            <Style x:Key="CardFrame" TargetType="Frame">
+                <Setter Property="Padding" Value="12" />
+                <Setter Property="IsClippedToBounds" Value="True" />
+
+                <Setter Property="VisualStateManager.VisualStateGroups">
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Dark={StaticResource CardBackgroundColorDark}, Light={StaticResource CardBackgroundColor}}" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Selected">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Dark={StaticResource CardSelectedBackgroundColorDark}, Light={StaticResource CardSelectedBackgroundColor}}" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </Setter>
+            </Style>
+
+            <Style
+                x:Key="CardPinnedFrame"
+                BasedOn="{StaticResource CardFrame}"
+                TargetType="Frame">
+
+                <Setter Property="VisualStateManager.VisualStateGroups">
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Dark={StaticResource CardPinnedBackgroundColorDark}, Light={StaticResource CardPinnedBackgroundColor}}" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Selected">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Dark={StaticResource CardSelectedBackgroundColorDark}, Light={StaticResource CardSelectedBackgroundColor}}" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </Setter>
+
+            </Style>
+
+            <Style TargetType="dxcv:SwipeItem">
+                <Setter Property="FontColor" Value="White" />
+                <Setter Property="FontSize" Value="Small" />
+            </Style>
+
+            <Style x:Key="CardContent" TargetType="Label">
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="VerticalOptions" Value="CenterAndExpand" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="TextColor" Value="{AppThemeBinding Dark={StaticResource TextColorPrimaryDark}, Light={StaticResource TextColorPrimary}}" />
+            </Style>
+
+            <DataTemplate x:Key="DefaultItemTemplate" x:DataType="models:Item">
+                <dxcv:SwipeContainer>
+
+                    <dxcv:SwipeContainer.ItemView>
+                        <Frame Style="{StaticResource CardFrame}">
+                            <Label Style="{StaticResource CardContent}" Text="{Binding Title}" />
+                        </Frame>
+                    </dxcv:SwipeContainer.ItemView>
+
+                    <dxcv:SwipeContainer.StartSwipeItems>
+                        <dxcv:SwipeItem
+                            BackgroundColor="#1e8d3e"
+                            Caption="Done"
+                            Command="{Binding Path=BindingContext.CompleteItemCommand, Source={x:Reference Name=collectionView}}"
+                            CommandParameter="{Binding .}"
+                            Image="collectionview_completetask" />
+                        <dxcv:SwipeItem
+                            BackgroundColor="#fda601"
+                            Caption="Pin"
+                            Command="{Binding Path=BindingContext.PinItemCommand, Source={x:Reference Name=collectionView}}"
+                            CommandParameter="{Binding .}"
+                            Image="collectionview_pintotop" />
+                    </dxcv:SwipeContainer.StartSwipeItems>
+
+                    <dxcv:SwipeContainer.EndSwipeItems>
+                        <dxcv:SwipeItem
+                            BackgroundColor="#ff3b30"
+                            Caption="Delete"
+                            Command="{Binding Path=BindingContext.DeleteItemCommand, Source={x:Reference Name=collectionView}}"
+                            CommandParameter="{Binding .}"
+                            Image="collectionview_deletetask" />
+                    </dxcv:SwipeContainer.EndSwipeItems>
+
+                </dxcv:SwipeContainer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="PinnedItemTemplate" x:DataType="models:Item">
+                <dxcv:SwipeContainer>
+
+                    <dxcv:SwipeContainer.ItemView>
+                        <Frame Style="{StaticResource CardPinnedFrame}">
+                            <Label
+                                Style="{StaticResource CardContent}"
+                                Text="{Binding Title}"
+                                TextColor="#e59601" />
+                        </Frame>
+                    </dxcv:SwipeContainer.ItemView>
+
+                    <dxcv:SwipeContainer.StartSwipeItems>
+                        <dxcv:SwipeItem
+                            BackgroundColor="#1e8d3e"
+                            Caption="Done"
+                            Command="{Binding Path=BindingContext.CompleteItemCommand, Source={x:Reference Name=collectionView}}"
+                            CommandParameter="{Binding .}"
+                            Image="collectionview_completetask" />
+                        <dxcv:SwipeItem
+                            BackgroundColor="#007df6"
+                            Caption="Unpin"
+                            Command="{Binding Path=BindingContext.UnpinItemCommand, Source={x:Reference Name=collectionView}}"
+                            CommandParameter="{Binding .}"
+                            Image="collectionview_uncompletetask" />
+                    </dxcv:SwipeContainer.StartSwipeItems>
+
+                    <dxcv:SwipeContainer.EndSwipeItems>
+                        <dxcv:SwipeItem
+                            BackgroundColor="#ff3b30"
+                            Caption="Delete"
+                            Command="{Binding Path=BindingContext.DeleteItemCommand, Source={x:Reference Name=collectionView}}"
+                            CommandParameter="{Binding .}"
+                            Image="collectionview_deletetask" />
+                    </dxcv:SwipeContainer.EndSwipeItems>
+
+                </dxcv:SwipeContainer>
+            </DataTemplate>
+
+            <DataTemplate x:Key="CompletedItemTemplate" x:DataType="models:Item">
+                <dxcv:SwipeContainer x:Name="swipeView">
+
+                    <dxcv:SwipeContainer.ItemView>
+                        <Frame Style="{StaticResource CardFrame}">
+                            <Label
+                                Style="{StaticResource CardContent}"
+                                Text="{Binding Title}"
+                                TextColor="{AppThemeBinding Dark={StaticResource StrikedItemTextColor},
+                                                            Light={StaticResource StrikedItemTextColorDark}}"
+                                TextDecorations="Strikethrough" />
+                        </Frame>
+                    </dxcv:SwipeContainer.ItemView>
+
+                    <dxcv:SwipeContainer.StartSwipeItems>
+                        <dxcv:SwipeItem
+                            BackgroundColor="#007df6"
+                            Caption="To Do"
+                            Command="{Binding Path=BindingContext.UncompleteItemCommand, Source={x:Reference Name=collectionView}}"
+                            CommandParameter="{Binding .}"
+                            Image="collectionview_uncompletetask" />
+                    </dxcv:SwipeContainer.StartSwipeItems>
+
+                    <dxcv:SwipeContainer.EndSwipeItems>
+                        <dxcv:SwipeItem
+                            BackgroundColor="#ff3b30"
+                            Caption="Delete"
+                            Command="{Binding Path=BindingContext.DeleteItemCommand, Source={x:Reference Name=collectionView}}"
+                            CommandParameter="{Binding .}"
+                            Image="collectionview_deletetask" />
+                    </dxcv:SwipeContainer.EndSwipeItems>
+
+                </dxcv:SwipeContainer>
+            </DataTemplate>
+
+            <local:ItemDataTemplateSelector
+                x:Key="itemDataTemplateSelector"
+                CompletedDataTemplate="{StaticResource CompletedItemTemplate}"
+                UncompletedDataTemplate="{StaticResource DefaultItemTemplate}"
+                UrgentDataTemplate="{StaticResource PinnedItemTemplate}" />
+
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior Command="{Binding BackCommand}" />
+    </Shell.BackButtonBehavior>
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Command="{Binding EditSheetCommand}" IconImageSource="ic_edit" />
+    </ContentPage.ToolbarItems>
+
+    <Shell.TitleView>
+        <Grid ColumnSpacing="0">
+            <Grid.Margin>
+                <OnPlatform x:TypeArguments="Thickness">
+                    <On Platform="Android" Value="0, 0, 16, 0" />
+                </OnPlatform>
+            </Grid.Margin>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Label
+                Grid.Column="0"
+                Style="{StaticResource NavBarTitle}"
+                Text="{Binding Title}" />
+        </Grid>
+    </Shell.TitleView>
+
+    <ContentPage.Content>
+        <Grid>
+
+            <dxcv:DXCollectionView
+                x:Name="collectionView"
+                IsPullToRefreshEnabled="True"
+                IsRefreshing="{Binding IsRefreshing, Mode=TwoWay}"
+                ItemSpacing="4"
+                ItemTemplate="{StaticResource itemDataTemplateSelector}"
+                ItemsSource="{Binding Items}"
+                PullToRefreshCommand="{Binding RefreshCommand}"
+                SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                SelectionMode="Single" />
+
+            <ImageButton
+                Margin="30"
+                Command="{Binding AddItemCommand}"
+                HorizontalOptions="End"
+                IsEnabled="{Binding IsBusy, Mode=OneWay, Converter={StaticResource InvertedBoolConverter}}"
+                Style="{StaticResource AddFab}"
+                VerticalOptions="End" />
+
+        </Grid>
+    </ContentPage.Content>
+</views:BasePage>

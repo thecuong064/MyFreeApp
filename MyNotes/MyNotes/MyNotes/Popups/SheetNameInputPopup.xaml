@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<popup:PopupPage
+    x:Class="MyNotes.Popups.SheetNameInputPopup"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:dxe="http://schemas.devexpress.com/xamarin/2014/forms/editors"
+    xmlns:popup="http://rotorgames.com">
+
+    <popup:PopupPage.Resources>
+        <ResourceDictionary />
+    </popup:PopupPage.Resources>
+
+    <Grid>
+
+        <Grid.GestureRecognizers>
+            <TapGestureRecognizer Tapped="OnBackgroundTapped" />
+        </Grid.GestureRecognizers>
+
+        <Frame
+            Margin="20,0"
+            BackgroundColor="{AppThemeBinding Dark=#3c3b41,
+                                              Light=White}"
+            CornerRadius="6"
+            VerticalOptions="CenterAndExpand">
+
+            <!--  use this redundant tapped event to override parent's tapped event  -->
+            <Frame.GestureRecognizers>
+                <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" />
+            </Frame.GestureRecognizers>
+
+            <StackLayout>
+
+                <dxe:TextEdit
+                    x:Name="nameContent"
+                    ClearIconVisibility="Never"
+                    ErrorColor="Red"
+                    ErrorText="*Required"
+                    IsErrorIconVisible="False"
+                    LabelText="Sheet name"
+                    PlaceholderText="Enter new name"
+                    TextChanged="nameContent_TextChanged"
+                    TextColor="{AppThemeBinding Dark={StaticResource TextColorPrimaryDark},
+                                                Light={StaticResource TextColorPrimary}}" />
+
+                <Grid
+                    Margin="0,15,0,0"
+                    ColumnDefinitions="*,*"
+                    RowDefinitions="Auto">
+                    <Button
+                        x:Name="cancelButton"
+                        Grid.Column="0"
+                        Clicked="cancelButton_Clicked"
+                        Style="{StaticResource NegativeButton}"
+                        Text="Cancel" />
+                    <Button
+                        x:Name="saveButton"
+                        Grid.Column="1"
+                        Clicked="saveButton_Clicked"
+                        Text="Done" />
+                </Grid>
+
+            </StackLayout>
+        </Frame>
+    </Grid>
+</popup:PopupPage>
